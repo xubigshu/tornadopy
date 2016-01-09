@@ -661,5 +661,3 @@ tornadopy 是基于[Tornado](https://github.com/tornadoweb/tornado)的web mvc框
 		my_event.send(sender=somesender.__class__, args1=arg)
 
 
-[![Bitdeli Badge](https://d2weczhvl823v0.cloudfront.net/xubigshu/tornadopy/trend.png)](https://bitdeli.com/free "Bitdeli Badge")
-
