@@ -1,0 +1,16 @@
+    language: python
+    python:
+        - "2.7"
+    env:
+        - TORNADO=3.2
+        - TORNADO=4.0
+        - TORNADO=4.0.2
+    install:
+        - pip install -q tornado==$TORNADO
+        - pip install https://github.com/dcramer/pyflakes/tarball/master
+        - pip install -r requirements.txt --use-mirrors
+        - pip install -q -e .
+    before_script:
+        - pyflakes -x W tornadopy
+    script:
+        - python setup.py test
