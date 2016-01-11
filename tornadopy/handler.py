@@ -33,6 +33,7 @@ class _HandlerPatch(RequestHandler):
             pass
 
     def _execute(self, transforms, *args, **kwargs):
+        #该函数是继承自web.py中
         current_context = {'request': self.request}
 
         with stack_context.StackContext(functools.partial(ThreadlocalLikeRequestContext, **current_context)):
