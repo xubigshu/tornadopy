@@ -34,6 +34,7 @@ class Application(web.Application):
             self.middleware_fac.run_init(self)
 
         if version_info[0] > 3:
+            #在版本高于4的都不是用__call__()函数处理请求了
             this = self
 
             class HttpRequest(httputil.HTTPServerRequest):
