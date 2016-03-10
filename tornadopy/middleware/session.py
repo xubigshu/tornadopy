@@ -46,6 +46,7 @@ class SessionMiddleware(object):
     session = None
 
     def process_init(self, application):
+        #如果session_cache_alias是default，则_cachestore是一个LocMemChche对象
         self._cachestore = caches[settings.SESSION.session_cache_alias]
 
     def process_request(self, handler, clear):

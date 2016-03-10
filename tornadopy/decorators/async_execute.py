@@ -55,6 +55,8 @@ from tornado.ioloop import IOLoop
 from ..settings_manager import settings
 from multiprocessing import cpu_count
 
+
+#设置接口的实现类的类型，同时设置设置实现类的参数
 Resolver.configure('tornado.netutil.ThreadedResolver',
                    num_threads=settings.THREADS_NUM if 'THREADS_NUM' in settings else cpu_count())
 
@@ -62,6 +64,9 @@ Resolver.configure('tornado.netutil.ThreadedResolver',
 def async_execute(fn):
     """
     新版tornado已有这个函数的实现，但是需要在class中绑定self.ioloop和self.executor,不太方便，这个版本消除了这个问题
+    
+    其实在 concurrent.py 中 run_on_executor 装饰器方法实现了类似的功能。
+
     """
     thread_resolver = ThreadedResolver()
 

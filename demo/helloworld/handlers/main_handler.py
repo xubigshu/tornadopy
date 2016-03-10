@@ -47,3 +47,35 @@ class BlogNew(BaseHandler):
             session.commit()
 
         self.finish('ok')
+
+
+#下面是session的测试代码
+class LoginHandler(WebHandler):
+    def get(self):
+        uid = self.get_argument("uid")
+        self.session['userid'] = uid
+
+        print "**************************"
+        print type(self.session)
+        print self.session
+        print "**************************"
+
+        self.session.set_expire(3600 * 24 * 30) #30天
+        self.finish('ok')
+
+class AuthHandler(WebHandler):
+    def get(self):
+        uid = self.session['userid']
+
+        print "************************"
+        print uid
+        print "************************"
+
+        
+
+        self.finish(uid)
+
+class LogoutHandler(WebHandler):
+    def get(self):
+        del self.session['userid']
+        self.finish('ok')

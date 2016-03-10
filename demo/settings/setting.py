@@ -80,6 +80,7 @@ CACHES = {
         'LOCATION': '127.0.0.1:6379',
         'OPTIONS': {
             'DB': 0,
+            'PASSWORD': 'juchongai',    #如果没有密码，则不要这一行
             'PARSER_CLASS': 'redis.connection.DefaultParser',
             'POOL_KWARGS': {
                 # timeout参数对有网络请求的库
@@ -153,7 +154,7 @@ IPV4_ONLY = True
 
 # 开启session支持
 SESSION = {
-    'session_cache_alias': 'default',  # 'session_loccache',对应cache配置
+    'session_cache_alias': 'default_redis',  # 'session_loccache',对应cache配置
     'session_name': '__TORNADOSSID',
     'cookie_domain': '',
     'cookie_path': '/',
@@ -193,22 +194,13 @@ DATABASE_CONNECTION = {
                 'ROLE': 'master',
                 'DRIVER': 'mysql+mysqldb',
                 'UID': 'root',
-                'PASSWD': '',
+                'PASSWD': 'juchongai',
                 'HOST': '',
                 'PORT': 3306,
                 'DATABASE': 'test',
                 'QUERY': {"charset": "utf8"}
             },
-            {
-                'ROLE': 'slave',
-                'DRIVER': 'mysql+mysqldb',
-                'UID': 'root',
-                'PASSWD': '',
-                'HOST': '',
-                'PORT': 3306,
-                'DATABASE': 'test',
-                'QUERY': {"charset": "utf8"}
-            }]
+            ]
     }
 }
 
