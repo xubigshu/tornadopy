@@ -75,6 +75,8 @@ class Manager(object):
     def register(self, name):
         if isinstance(name, (str, unicode,)):
             name = import_object(name)
+
+        #此处是将MIDDLEWARE_CLASSES中的类进行实例化
         name = name()
 
         if hasattr(name, 'process_init'):
