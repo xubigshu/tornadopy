@@ -36,6 +36,7 @@ tornadopy 是基于[Tornado](https://github.com/tornadoweb/tornado)的web mvc框
  	* [db&orm](#user-content-dborm)
  	* [线程池异步](#user-content-异步线程池)
  	* [session](#user-content-session)
+ 	* [token](#user-content-token)
  	* [signal](#user-content-signal)
  	
 <br>
@@ -625,6 +626,49 @@ tornadopy 是基于[Tornado](https://github.com/tornadoweb/tornado)的web mvc框
 			class LogoutHandler(WebHandler):
 				def get(self,uid):
 					del self.session['userid']
+
+
+* ####token：
+
+	tornadopy提供一个token功能，token只可以使用tornadopy.cache下的redis缓存模块来实现。
+	
+	首先，你需要增加中间件 `tornadopy.middleware.token.TokenMiddleware` 来开启对token的支持，在具体的路由handler中，可以通过handler.token获取token存储对象。
+	
+	token配置：
+
+		TOKEN = {
+		    'token_cache_alias': 'default_redis',  # 此处必须是 default_redis
+		    'ignore_change_ip': False,
+		    'token_timeout': 2592000,
+		    'secret_key': 'xxxxxxxxxxxxxxxxxxxx',
+		    'token_version': ''
+		}
+
+	token使用：
+		你可以像这样使用token：
+		
+
+			class LoginTokenHandler(WebHandler):
+			    def get(self):
+			        userID = self.get_argument("userID")
+			        userName = self.get_argument("userName")
+
+			        tmp_data = {
+			            "userID": userID,
+			            "userName": userName
+			        }
+
+			        tokenID = self.token.save(tmp_data)
+			        self.write(tokenID)
+
+			class LoginTokenTestHandler(WebHandler):
+			    def get(self):
+			        if self.token.get_current_user() == None:
+			            self.write("tokenID 非法")
+			        else:
+			            self.write("tokenID 是合法的")
+			        
+
 
 * ####signal:
 
