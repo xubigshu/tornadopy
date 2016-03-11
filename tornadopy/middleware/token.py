@@ -7,22 +7,16 @@
 # @date     2016-1-9
 # @note     注释如下:
 """
-token中间件,支持disk，进程内缓存cache,memcache
-sessioin过期策略分为三种情形：
-1.固定时间过期，例如10天内没有访问则过期，timeout=xxx
-    *cookie策略：每次访问时设置cookie为过期时间
-    *缓存策略：每次访问设置缓存失效时间为固定过期时间
-2.会话过期，关闭浏览器即过期timeout=0
-    *cookie策略：岁浏览器关闭而过期
-    *缓存策略：设置缓存失效期为1天，每次访问更新失效期，如果浏览器关闭，则一天后被清除
-
-3.永不过期(记住我)
-    *cookie策略：timeout1年
-    *缓存策略：1年
+token中间件,只支持redis
+1.这部分功能是整合之前代码的token功能进来。
 """
 import os
 import time
 import re
+import uuid
+import hmac
+import json
+import hashlib
 
 try:
     import hashlib
@@ -38,160 +32,211 @@ from tornadopy.utils import safestr
 from tornadopy.settings_manager import settings
 from tornadopy.cache import caches
 
+
 rx = re.compile('^[0-9a-fA-F]+$')
 
 
-class tokenMiddleware(object):
-    _cachestore = None
-    token = None
-
-    def process_init(self, application):
-        self._cachestore = caches[settings.token.token_cache_alias]
-
-    def process_request(self, handler, clear):
-        token = tokenManager(handler, self._cachestore, settings.token)
-        token.load_token()
-        handler.token = token
-
-    def process_response(self, handler, clear, chunk):
-        if hasattr(handler, "token"):
-            handler.token.save()
-            del handler.token
-
-
-_DAY1 = 24 * 60 * 60
-_DAY30 = _DAY1 * 30
-
 token_parameters = storage({
-    'token_name': '__TORNADOSSID',
-    'cookie_domain': None,
-    'cookie_path': '/',
-    'expires': 0,  # 24 * 60 * 60, # 24 hours in seconds
+    'token_cache_alias': 'default_redis',  # 此处必须是 default_redis
     'ignore_change_ip': False,
-    'httponly': True,
-    'secure': False,
+    'token_timeout': 2592000,
     'secret_key': 'fLjUfxqXtfNoIldA0A0J',
     'token_version': ''
 })
 
 
-class tokenManager(object):
-    _killed = False
+class TokenMiddleware(object):
+    _cachestore = None
+    _tokenManager = None
+    token = None
 
-    def __init__(self, handler, store, config=None):
-        self._get_cookie = handler.get_cookie
-        self._set_cookie = handler.set_cookie
-        self.remote_ip = handler.request.remote_ip
-        self.store = store
+    def process_init(self, application):
+        self._cachestore = (caches[settings.TOKEN.token_cache_alias]).get_old_redis()
+
         self.config = storage(token_parameters)
-        if config:
-            self.config.update(config)
+        if settings.TOKEN:
+            self.config.update(settings.TOKEN)
 
+        self._tokenManager = TokenManager(self._cachestore, self.config["secret_key"])
+
+
+    def process_request(self, handler, clear):
+        token = Token(self._tokenManager, handler, self.config)
+        handler.token = token
+
+
+
+class TokenData(dict):
+    def __init__(self, tokenID):
+        self.tokenID = tokenID
+     
+class Token(TokenData):
+    def __init__(self, token_manager, request_handler, config):
+        self.token_manager = token_manager
+        self.request_handler = request_handler
+        
+        self.config = config
+
+        try:
+            current_token = self.token_manager.get(request_handler)
+        except Exception, e:
+            raise ValueError("get token info from request_handler failed")
+
+        #------------------------保存的token信息:begin-----------------------------#
         self._data = {}
+        self._data.update(current_token)
+        # for key, data in current_token.iteritems():
+        #     self._data[key] = data
 
-    def __contains__(self, key):
-        return key in self._data
+        #将客户端的ip记录下来，用于将变化的ip的登录状态给登出
+        self._data['remote_ip'] = request_handler.request.remote_ip
 
-    def __setitem__(self, key, value):
-        self._data[key] = value
+        self.tokenID = current_token.tokenID
+        #------------------------保存的token信息:end------------------------------#
 
-    def __getitem__(self, key):
-        return self._data.get(key, None)
+    
 
-    def __delitem__(self, key):
-        del self._data[key]
+    #------下面是一些接口方法，供外部使用token-------------------#
 
-    def get(self, key, default=None):
-        return self._data.get(key, default)
+    #保存token信息的方法
+    def save(self, tmp_data):
+        self._data.update(tmp_data)
+        return self.token_manager.set(self, self.config["token_timeout"])
 
-    def load_token(self):
-        """
-        加载token
-        :return:
-        """
-        self.tokenid = self._get_cookie(self.config.token_name)
+    #根据tokenID，查找token的方法
+    def fetch(self,tokenID):
+        tokenData = self.token_manager._fetch(tokenID)
+        return tokenData["userID"]
+    
+    #根据参数，查找对应的参数，否则抛出异常。
+    def get_current_parameter(self, parameter):
+        #此处的get方法调用的是字典的get方法,下同
+        _value = None
+        try:
+            _value = self._data.get(parameter)
+        except Exception, e:
+            raise ValueError("parameter '%s' not found" % parameter)
+        return _value
 
-        if self.tokenid and not self._valid_token_id(self.tokenid):
-            self.expired()
 
-        if self.tokenid:
-            if self.tokenid in self.store:
-                expires, _data = self.store.get(self.tokenid)
-                self._data.update(_data)
-                self.config.expires = expires
-            self._validate_ip()
+    def get_current_user(self):
+        return self._data.get("userID")
 
-        if not self.tokenid:
-            self.tokenid = self._create_tokenid()
+    def get_current_authCode(self):
+        return self._data.get("authCode")
 
-        self._data['remote_ip'] = self.remote_ip
+    def get_current_user_name(self):
+        return self._data.get("userName")
 
-    def save(self):
-        if not self._killed:
-            httponly = self.config.httponly
-            secure = self.config.secure
-            expires = self.config.expires  # 单位:秒
-            cache_expires = expires
-            if expires == 0:
-                # 过期时间为0时，对于tornado来说，是会话有效期，关闭浏览器失效，但是
-                # 对于cache缓存而言，无法及时捕获会话结束状态，鉴于此，将cache的缓存设置为一天
-                # cache在每次请求后会清理过期的缓存
-                cache_expires = _DAY1
+    def get_current_authToken(self):
+        return self._data.get("authToken")
 
-            if not secure:
-                secure = ''
+    #定义一个登陆权限认证的装饰器,暂时还没想好怎么使用这个装饰器比较好。先留这儿，不用吧
+    def login_required(f):
+        def _wrapper(self,*args, **kwargs):
+            logged = self.get_current_user()
+            if logged == None:
+                result = {"code":-1,"reason":"tokenID invalid"}
+                data = {"result":result}
+                self.set_header("Content-Type", "application/json; charset=UTF-8")
+                self.write(json.dumps(data))
+                self.finish()
+            else:
+                ret = f(self,*args, **kwargs)
+        return _wrapper
 
-            if not httponly:
-                httponly = ''
-            set_expire = 0 if expires == 0 else time.time() + expires
-            self._set_cookie(
-                self.config.token_name,
-                self.tokenid,
-                domain=self.config.cookie_domain or '',
-                expires=set_expire,
-                path=self.config.cookie_path,
-                secure=secure,
-                httponly=httponly)
 
-            self.store.set(self.tokenid, (expires, self._data), cache_expires)
+class TokenManager(object):
+    '''
+    #--- TokenManager中的方法不能在接口中调用。
+    '''
+    def __init__(self, tmp_store, secret):
+        self.redis = tmp_store
+        self.secret = secret
+    
+    def _fetch(self, tokenID):
+        try:
+            token_data = raw_data = self.redis.get(tokenID)
+            if raw_data != None:
+                #self.redis.setex(tokenID, self.token_timeout, raw_data)
+                token_data = json.loads(raw_data)
 
+            if type(token_data) == type({}):
+                return token_data
+            else:
+                return {}
+        except IOError:
+            return {}
+
+
+    def getInfoByUserName(self, userName):
+        '''
+        该方法用于根据提供的userName,先得到对应的token信息
+        '''
+        tmpTokenID = None
+        tmpTokenID = self.redis.hget("onlineUser", userName)
+        if self.redis.exists(tmpTokenID):
+            token_data = self._fetch(tmpTokenID)
+            token = {}
+            for key, data in token_data.iteritems():
+                token[key] = data
+            return token["pushUdid"],token["clientOS"]
         else:
-            self._set_cookie(self.config.token_name, self.tokenid, expires=-1)
-            self.store.delete(self.tokenid)
-            self.tokenid = None
-            self._killed = False
+            return None,None
 
-    def _valid_token_id(self, token_id):
-        """
-        验证tokenid格式
-        :return:bool
-        """
-        if token_id:
-            sess = token_id.split('|')
-            if len(sess) > 1:
-                return rx.match(sess[0]) and sess[1] == self.config.token_version
 
-    def expired(self):
+    def get(self, request_handler = None):
+        if (request_handler == None):
+            tokenID = None
+        else:
+            tokenID = request_handler.get_argument("tokenID", None)
+        
+        if tokenID == None:
+            token_exists = False
+            tokenID = -1
+        else:
+            if self.redis.exists(tokenID) == 1:
+                token_exists = True
+            else:
+                token_exists = False
+            
+        
+        token = TokenData(tokenID)
+        if token_exists:
+            token_data = self._fetch(tokenID)
+            for key, data in token_data.iteritems():
+                token[key] = data
+        return token
+    
+    def set(self, token, expiresTime):
+        tmp_token = token._data
+        if expiresTime is None:
+            expiresTime = self.token_timeout
+        token_data = json.dumps(dict(tmp_token.items()))
+        tmpTokenID = self.redis.hget("onlineUser", tmp_token["userName"])
+        if self.redis.exists(tmpTokenID):
+            token.tokenID = tmpTokenID
+            self.redis.setex(token.tokenID, expiresTime, token_data)
+            return token.tokenID
+        else:
+            token.tokenID = self._generate_id()
+            self.redis.setex(token.tokenID, expiresTime, token_data)
+
+            self.redis.hset("onlineUser", tmp_token["userName"], token.tokenID)
+            return token.tokenID
+
+
+    def _generate_id(self):
+        newID = hashlib.sha256(self.secret + str(uuid.uuid4()))
+
+        return newID.hexdigest()
+
+    def _generate_hmac(self, tokenID):
+        return hmac.new(tokenID, self.secret, hashlib.sha256).hexdigest()
+
+    def expired(self, tokenID):
         """
         强制过期
         :return:None
         """
-        self._killed = True
-        self.save()
-
-    def _create_tokenid(self):
-        rand = os.urandom(16)
-        now = time.time()
-        secret_key = self.config.secret_key
-        token_id = sha1("%s%s%s%s" % (rand, now, safestr(self.remote_ip), secret_key))
-        token_id = token_id.hexdigest()
-        return str(token_id).upper() + '|' + self.config.token_version
-
-    def _validate_ip(self):
-        if self.tokenid and self._data.get('remote_ip', None) != self.remote_ip:
-            if not self.config.ignore_change_ip:
-                return self.expired()
-
-    def set_expire(self, expires):
-        self.config.expires = expires
-        self.save()
+        self.redis.delete(tokenID)

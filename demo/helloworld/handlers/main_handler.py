@@ -79,3 +79,66 @@ class LogoutHandler(WebHandler):
     def get(self):
         del self.session['userid']
         self.finish('ok')
+
+
+#下面是测试token信息
+class LoginTokenHandler(WebHandler):
+    def get(self):
+        userID = self.get_argument("userID")
+        userName = self.get_argument("userName")
+
+        tmp_data = {
+            "userID": userID,
+            "userName": userName
+        }
+
+        print "*******************"
+
+        print self.token
+        print type(self.token)
+
+        print "*********************"
+
+        tokenID = self.token.save(tmp_data)
+
+        self.write(tokenID)
+
+
+#下面是测试token信息
+class LoginTokenHandler(WebHandler):
+    def get(self):
+        userID = self.get_argument("userID")
+        userName = self.get_argument("userName")
+
+        tmp_data = {
+            "userID": userID,
+            "userName": userName
+        }
+
+        print "*******************"
+
+        print self.token
+        print type(self.token)
+
+        print "*********************"
+
+        tokenID = self.token.save(tmp_data)
+
+        self.write(tokenID)
+
+#下面是测试token信息
+class LoginTokenTestHandler(WebHandler):
+
+    def get(self):
+
+        print "*******************"
+
+        print self.token
+        print type(self.token)
+
+        print "*********************"
+        
+        if self.token.get_current_user() == None:
+            self.write("tokenID 非法")
+        else:
+            self.write("tokenID 是合法的")

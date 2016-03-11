@@ -412,3 +412,8 @@ class RedisCache(CacheMixin, RedisClient):
         """
         key = self.make_key(key, version=version)
         return self._client.exists(key)
+
+
+    #返回原始的redis，方便调用
+    def get_old_redis(self):
+        return self._client

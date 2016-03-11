@@ -15,6 +15,8 @@ urls = route(
     u(name='BlogNew', pattern=r'/BlogNew', handler='main_handler.BlogNew'),
     u(name='LoginHandler', pattern=r'/LoginHandler', handler='main_handler.LoginHandler'),
     u(name='AuthHandler', pattern=r'/AuthHandler', handler='main_handler.AuthHandler'),
-    u(name='LogoutHandler', pattern=r'/LogoutHandler', handler='main_handler.LogoutHandler')
+    u(name='LogoutHandler', pattern=r'/LogoutHandler', handler='main_handler.LogoutHandler'),
+    u(name='LoginTokenHandler', pattern=r'/LoginTokenHandler', handler='main_handler.LoginTokenHandler'),
+    u(name='TokenTest', pattern=r'/LoginTokenTestHandler', handler='main_handler.LoginTokenTestHandler')
 )
 

@@ -29,6 +29,7 @@ TORNADO_CONF = {
 # ###########
 MIDDLEWARE_CLASSES = (
     'tornadopy.middleware.accesslog.AccessLogMiddleware',
+    'tornadopy.middleware.token.TokenMiddleware',
     'tornadopy.httpmodule.httpmodule.HttpModuleMiddleware',
 )
 INSTALLED_APPS = (
@@ -154,6 +155,15 @@ SESSION = {
     'secure': False,
     'secret_key': 'fLjUfxqXtfNoIldA0A0J',
     'session_version': 'EtdHjDO1'
+}
+
+# 开启token支持，该模式只支持redis，对于其他几种缓存，其他几种缓存不支持
+TOKEN = {
+    'token_cache_alias': 'default_redis',  # 此处必须是 default_redis
+    'ignore_change_ip': False,
+    'token_timeout': 2592000,
+    'secret_key': 'fLjUfxqXtfNoIldA0A0J',
+    'token_version': ''
 }
 
 
