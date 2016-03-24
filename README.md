@@ -95,7 +95,6 @@ tornadopy 是基于[Tornado](https://github.com/tornadoweb/tornado)的web mvc框
 		
 		project_path = settings.PROJECT_PATH
 
-	*version 1.6.7 add* :
 	
 	`DEBUG`: 控制应用是否处于debug状态，等同于 tornado的debug参数。  
 	`XHEADERS`： 控制是否开启httpserver的 xheaders。你不用再额外传递一个xheader参数。
@@ -121,7 +120,6 @@ tornadopy 是基于[Tornado](https://github.com/tornadoweb/tornado)的web mvc框
 
 	很多情况下，我们希望对Application对象进行个性化的处理，通常，我们习惯于实现一个Application子类：
 
-	*version 1.6.7 add*:
 
 		from tornadopy.application import Application
 	
@@ -142,7 +140,6 @@ tornadopy 是基于[Tornado](https://github.com/tornadoweb/tornado)的web mvc框
 	>        
 	>        Server().server_start(no_keep_alive=True,backlog=512)
 
-	*version 1.6.7 add* :
 
 	`server.load_all` ：如果你希望控制一些细节，但是又希望更简单的启动服务 , `load_all()` 会是更好的选择。 
 
