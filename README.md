@@ -239,7 +239,6 @@ tornadopy 是基于[Tornado](https://github.com/tornadoweb/tornado)的web mvc框
 		)
 	
 * ####log：
-    ###### version add:1.8.0  
 	tornadopy支持使用原生tornado日志模块，或tornadopy基于logging扩展日志，tornadopy默认启用扩展日志代替tornado默认的log，除非`--disable_log＝False` ,则启用tornado.log模块 。
 
 		from tornadopy.logger import syslogger
