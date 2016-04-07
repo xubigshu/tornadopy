@@ -1,7 +1,7 @@
 #tornadopy Web Framework
 A simple app web framework based on tornado.
 
-[![Build Status](https://travis-ci.org/xubigshu/tornadopy.svg?branch=master)](https://travis-ci.org/xubigshu/tornadopy)
+<!-- [![Build Status](https://travis-ci.org/xubigshu/tornadopy.svg?branch=master)](https://travis-ci.org/xubigshu/tornadopy) -->
 
 ###version:1.0.0
 
@@ -628,8 +628,11 @@ tornadopy 是基于[Tornado](https://github.com/tornadoweb/tornado)的web mvc框
 
 	tornadopy提供一个token功能，token只可以使用tornadopy.cache下的redis缓存模块来实现。
 	
+
 	首先，你需要增加中间件 `tornadopy.middleware.token.TokenMiddleware` 来开启对token的支持，在具体的路由handler中，可以通过handler.token获取token存储对象。
 	
+	注意:其实把token模块做成HTTP处理器更优雅。
+
 	token配置：
 
 		TOKEN = {
