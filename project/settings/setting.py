@@ -34,11 +34,12 @@ TORNADO_CONF = {
 MIDDLEWARE_CLASSES = (
     'tornadopy.middleware.accesslog.AccessLogMiddleware',
     # 'tornadopy.middleware.session.SessionMiddleware',
-    'tornadopy.middleware.token.TokenMiddleware',
-    'tornadopy.httpmodule.httpmodule.HttpModuleMiddleware',
+    # 'tornadopy.middleware.token.TokenMiddleware',
+    # 'tornadopy.httpmodule.httpmodule.HttpModuleMiddleware',
 )
 
 INSTALLED_APPS = (
+    'project_app',
     'project_web',
 )
 

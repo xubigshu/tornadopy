@@ -7,10 +7,10 @@
 # @date     2016-1-9
 #
 
-from tornadopy.handler import WebHandler
+from tornadopy.handler import ApiHandler
 
 
-class BaseHandler(WebHandler):
+class BaseHandler(ApiHandler):
     """
     do some your base things
     """
@@ -19,7 +19,8 @@ class BaseHandler(WebHandler):
 class Main(BaseHandler):
     def get(self):
         welcome = "Hello,tornadopy!"
-        self.render("index.html", welcome=welcome)
+        # self.render("index.html", welcome=welcome)
+        self.write("app project")
 
 # model query
 from ..models.main_models import Blog, User
@@ -50,7 +51,7 @@ class BlogNew(BaseHandler):
 
 
 #下面是session的测试代码
-class LoginHandler(WebHandler):
+class LoginHandler(BaseHandler):
     def get(self):
         uid = self.get_argument("uid")
         self.session['userid'] = uid
@@ -63,7 +64,7 @@ class LoginHandler(WebHandler):
         self.session.set_expire(3600 * 24 * 30) #30天
         self.finish('ok')
 
-class AuthHandler(WebHandler):
+class AuthHandler(BaseHandler):
     def get(self):
         uid = self.session['userid']
 
@@ -75,14 +76,14 @@ class AuthHandler(WebHandler):
 
         self.finish(uid)
 
-class LogoutHandler(WebHandler):
+class LogoutHandler(BaseHandler):
     def get(self):
         del self.session['userid']
         self.finish('ok')
 
 
 #下面是测试token信息
-class LoginTokenHandler(WebHandler):
+class LoginTokenHandler(BaseHandler):
     def get(self):
         userID = self.get_argument("userID")
         userName = self.get_argument("userName")
@@ -105,7 +106,7 @@ class LoginTokenHandler(WebHandler):
 
 
 #下面是测试token信息
-class LoginTokenHandler(WebHandler):
+class LoginTokenHandler(BaseHandler):
     def get(self):
         userID = self.get_argument("userID")
         userName = self.get_argument("userName")
@@ -127,7 +128,7 @@ class LoginTokenHandler(WebHandler):
         self.write(tokenID)
 
 #下面是测试token信息
-class LoginTokenTestHandler(WebHandler):
+class LoginTokenTestHandler(BaseHandler):
 
     def get(self):
 
