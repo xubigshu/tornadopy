@@ -70,8 +70,18 @@ class ApiHandler(UncaughtExceptionMixin, _HandlerPatch):
             fmt = self.get_format()
 
         if fmt == 'json':
+            '''
+            #：增加json直接序列化一个对象
+            '''
             self.set_header("Content-Type", "application/json; charset=UTF-8")
-            self.write(json.dumps(obj, ensure_ascii=ensure_ascii))
+            data = {}
+            if isinstance(user, dict):
+                data = obj
+            elif isinstance(user, object):
+                data.update(obj.__dict__)
+            else:
+                data = obj
+            self.write(json.dumps(data, ensure_ascii=ensure_ascii))
         elif fmt == 'jsonp':
             self.set_header("Content-Type", "application/javascript")
             callback = self.get_argument('callback', 'callback')
