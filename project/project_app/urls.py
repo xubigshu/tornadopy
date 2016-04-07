@@ -8,7 +8,7 @@
 #
 from tornadopy import Url, route
 
-u = Url('helloworld.handlers')
+u = Url('project_web.handlers')
 urls = route(
     u(name='Index', pattern=r'/', handler='main_handler.Main'),
     u(name='BlogList', pattern=r'/BlogList', handler='main_handler.BlogList'),

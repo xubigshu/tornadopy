@@ -74,9 +74,9 @@ tornadopy 是基于[Tornado](https://github.com/tornadoweb/tornado)的web mvc框
             +- runserver.py
                 
 
-  * helloworld :
+  * project_web :
 	
-		你可以参考demo目录下的 `helloworld` 项目示例，并运行：
+		你可以参考demo目录下的 `project_web` 项目示例，并运行：
 		
 			python runserver.py --address=0.0.0.0 --port=8000 --settings=settings.setting
 

@@ -39,7 +39,7 @@ MIDDLEWARE_CLASSES = (
 )
 
 INSTALLED_APPS = (
-    'helloworld',
+    'project_web',
 )
 
 # 全局modules配置

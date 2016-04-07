@@ -26,7 +26,7 @@ if __name__ == '__main__':
     server.parse_command()
 
     if options.runmode == 'syncdb':
-        from helloworld.sync_db import syncdb
+        from project_web.sync_db import syncdb
 
         syncdb()
     elif options.runmode == 'runserver':
