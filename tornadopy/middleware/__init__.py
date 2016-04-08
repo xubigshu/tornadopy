@@ -3,6 +3,5 @@
 
 #
 # @author   xubigshu@gmail.com
-# @site     http://www.51lu.me
 # @date     2016-1-9
 #

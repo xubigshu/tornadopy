@@ -3,7 +3,6 @@
 
 #
 # @author   xubigshu@gmail.com
-# @site     http://www.51lu.me
 # @date     2016-1-9
 # @note     from web.py 对字典进行扩展，使其支持通过 dict.a形式访问以代替dict['a']
 #

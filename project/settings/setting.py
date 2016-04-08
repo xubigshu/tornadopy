@@ -3,7 +3,6 @@
 
 #
 # @author   xubigshu@gmail.com
-# @site     http://www.51lu.me
 # @date     2016-1-9
 #
 import os
@@ -19,7 +18,7 @@ XHEADERS = True
 # tornado全局配置
 TORNADO_CONF = {
     "static_path": "static",
-    "xsrf_cookies": True,
+    "xsrf_cookies": True,s
     "login_url": '/login',
     "cookie_secret": "bXZ/gDAbQA+zaTxdqJwxKa8OZTbuZE/ok3doaow9N4Q=",
     "template_path": os.path.join(PROJECT_PATH, 'templates'),

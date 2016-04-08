@@ -3,7 +3,6 @@
 
 #
 # @author   xubigshu@gmail.com
-# @site     http://www.51lu.me
 # @date     2016-1-9
 # @note     common handler,webhandler,apihandler 要获得tornadopy的中间件等特性需继承这些handler
 #

@@ -3,7 +3,6 @@
 
 #
 # @author   xubigshu@gmail.com
-# @site     http://www.51lu.me
 # @date     2016-1-9
 # @note     access log中间件，替换tornado的log_request实现插件式日志输出
 #

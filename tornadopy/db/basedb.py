@@ -3,7 +3,6 @@
 
 #
 # @author   xubigshu@gmail.com
-# @site     http://www.51lu.me
 # @date     2016-1-9
 # @note     Database API, Originally based on web.py http://webpy.org/
 #

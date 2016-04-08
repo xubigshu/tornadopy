@@ -3,7 +3,6 @@
 
 #
 # @author   xubigshu@gmail.com
-# @site     http://www.51lu.me
 # @date     2016-1-9
 # @note     dbalchemy中间件，加入此中间件可以自动帮助dbalchemy模块处理连接的关闭
 #
